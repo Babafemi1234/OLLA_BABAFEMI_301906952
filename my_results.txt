@@ -1,0 +1,179 @@
+MY RESULTS - collected Thu Nov 12 13:02:41 UTC 2026
+
+=================== P1 - database design (row counts and constraint tests) ===================
+  orders           : 63163
+  order items      : 156885
+  payments         : 63163
+  deliveries       : 57257
+  rider assignments: 114912
+  pickup slots     : 22800
+  slots over capacity: 0   (MUST be 0)
+PASS test 1: slot capacity trigger rejected over-capacity booking
+PASS test 2: EXCLUDE constraint rejected overlapping pickup for the same rider
+PASS test 3: EXCLUDE constraint rejected rider pickup vs delivery overlap
+PASS test 4: CHECK rejected delivery where delivered_at is before picked_up_at
+PASS test 5: CHECK rejected order_item with quantity = 0
+PASS test 5b: CHECK rejected order_item with negative quantity
+PASS test 6: CHECK rejected payment with amount = 0
+PASS test 6b: CHECK rejected payment with negative amount
+PASS test 7: status transition trigger rejected BOOKED -> READY
+PASS test 8: trigger rejected INSERT with initial status WASHING
+PASS test 9: trigger rejected status change out of terminal CANCELLED
+PASS test 10: CHECK rejected a slot window that is not 2 hours
+PASS test 11: CHECK rejected invalid vehicle value
+PASS test 12: CHECK rejected invalid service value
+PASS test 13: UNIQUE rejected a second payment for the same order
+
+=================== P2 - query optimisation (before/after, real ms) ===================
+Query | BEFORE ms | AFTER ms | main scan type BEFORE -> AFTER
+Q1 | 29.934 | 0.280 | Seq Scan -> Index Only Scan
+Q2 | 38.751 | 32.873 | Seq Scan -> Index Only Scan
+Q3 | 65.148 | 62.457 | Seq Scan -> Seq Scan
+Q4 | 39.524 | 33.703 | Seq Scan -> Index Only Scan
+Q5 | 47.440 | 35.279 | Seq Scan -> Index Only Scan
+Q6 | 43.507 | 46.535 | Seq Scan -> Seq Scan
+Q7 | 18.184 | 19.593 | Seq Scan -> Seq Scan
+Q8 | 50.550 | 29.689 | Seq Scan -> Index Only Scan
+Q9 | 2.882 | 0.350 | Bitmap Heap Scan -> Bitmap Heap Scan
+Q10 | 9.429 | 0.311 | Seq Scan -> Index Only Scan
+
+Note: Q2-Q8 read the whole history, so an index cannot help much and the planner correctly keeps
+Seq Scan; run-to-run noise of a few ms is normal. Q9 and Q10 are selective, which is where indexes win.
+
+=================== P3 - transactions and concurrency (two real sessions) ===================
+Portfolio 3 - concurrency demos (two real sessions)
+
+=== PART 1 - the bug: check-then-insert at READ COMMITTED (slot capacity 5, 4 used) ===
+  [A] counts 4 used of 5 -> looks free
+  [B] counts 4 used of 5 -> looks free
+  [A] INSERT booking (not committed yet)
+  [B] INSERT booking (A's row is invisible to B)
+  [A] COMMIT
+  [B] COMMIT
+  RESULT: 6 bookings in a slot of capacity 5  ->  OVERBOOKED (bug reproduced)
+
+=== PART 2 - fix 1: SELECT ... FOR UPDATE on the slot row (what book_pickup() does) ===
+  [A] locked the slot row
+  [B] is waiting for A's lock (thread alive = True)
+  [A] counts 4 used -> free
+  [A] COMMIT (lock released)
+  [B] got the lock, counted 5 used -> REJECTED: slot full
+  RESULT: 5 bookings, capacity 5  ->  correct, no overbooking
+
+=== PART 3 - fix 2: SERIALIZABLE isolation (one session is told to retry) ===
+  [A] counts 4 used
+  [B] counts 4 used
+  [A] COMMIT ok
+  [B] COMMIT refused, SQLSTATE 40001: could not serialize access due to read/write dependencies among transactions
+  RESULT: 5 bookings, capacity 5  ->  correct (the loser must retry)
+
+=== PART 4 - deadlock: A locks slot 1 then 2, B locks slot 2 then 1 ===
+  [A] locked slot 631
+  [B] locked slot 632
+  [A] 40P01 deadlock detected
+  [B] ok
+  RESULT: PostgreSQL killed ['A'] with SQLSTATE 40P01; the other session completed.
+  Fix: always lock slots in ascending slot_id order (then no cycle is possible).
+
+Done.
+Demo A: booked order 63178 (payments ok). Orders in slot: 0 -> 1
+Demo B: payment failed -> PAYMENT_FAILED: payment gateway declined the card
+Demo B: orders in slot: 0 -> 0 (MUST be equal)
+Demo C: order 63180 persisted with status=CANCELLED , payment status=failed
+
+=================== P4 - MongoDB (documents and COLLSCAN to IXSCAN) ===================
+  inserted 2000 / 50000
+  inserted 4000 / 50000
+  inserted 6000 / 50000
+ SUMMARY (real numbers from your database)
+   BEFORE: leaf=COLLSCAN, totalDocsExamined=50000, totalKeysExamined=0, executionTimeMillis=19
+   AFTER : leaf=IXSCAN, totalDocsExamined=3799, totalKeysExamined=3799, executionTimeMillis=7
+
+
+=================== P5 - partitioning ===================
+ Rows per month in the partitioned table (laundry_order_p)
+  month  | rows 
+ 2024-11 | 1622
+ 2024-12 | 2629
+ 2025-01 | 2604
+ 2025-02 | 2276
+ 2025-03 | 2611
+ 2025-04 | 2762
+ 2025-05 | 2665
+ 2025-06 | 2632
+ 2025-07 | 2673
+ 2025-08 | 2609
+ 2025-09 | 2624
+ 2025-10 | 2600
+ 2025-11 | 2547
+ 2025-12 | 2640
+ 2026-01 | 2655
+ 2026-02 | 2354
+ 2026-03 | 2496
+ 2026-04 | 2643
+ 2026-05 | 2681
+ 2026-06 | 2687
+ 2026-07 | 2725
+ 2026-08 | 2647
+ 2026-09 | 2680
+ 2026-10 | 2579
+ 2026-11 | 1538
+(25 rows)
+ Execution Time: 12.956 ms
+ flat_count | partitioned_count 
+      63179 |             63179
+ rows_in_default_partition 
+ 5432 | f
+ 5433 | t
+          36 | repl.1794488558@example.com
+          36 | Replica Stream Test | repl.1794488558@example.com
+
+=================== P5 - replication (primary 5432, replica 5433) ===================
+=== 1. Who is who ===
+-- PRIMARY (port 5432):
+ port | is_replica 
+------+------------
+ 5432 | f
+(1 row)
+
+-- REPLICA (port 5433):
+ port | is_replica 
+------+------------
+ 5433 | t
+(1 row)
+
+
+=== 2. A write on the REPLICA must be rejected (read-only standby) ===
+ERROR:  cannot execute INSERT in a read-only transaction
+-> rejected as expected (replica is read-only)
+
+=== 3. Insert on the PRIMARY ===
+ customer_id |            email            
+-------------+-----------------------------
+          36 | repl.1794488558@example.com
+(1 row)
+
+INSERT 0 1
+
+=== 4. The row arrives on the REPLICA (streamed WAL) ===
+ customer_id |      full_name      |            email            
+-------------+---------------------+-----------------------------
+          36 | Replica Stream Test | repl.1794488558@example.com
+(1 row)
+
+
+=== 5. Replication status (PRIMARY view) ===
+ application_name |   state   | sync_state | replay_lag_bytes 
+------------------+-----------+------------+------------------
+ replica          | streaming | async      |                0
+(1 row)
+
+
+=== 6. Replica replay delay (REPLICA view) ===
+ replayed_lsn |     delay      
+--------------+----------------
+ 0/1C003618   | 00:00:01.09676
+(1 row)
+
+
+Replication demo complete.
