@@ -1,0 +1,14 @@
+Query | BEFORE ms | AFTER ms | main scan type BEFORE -> AFTER
+Q1 | 29.934 | 0.280 | Seq Scan -> Index Only Scan
+Q2 | 38.751 | 32.873 | Seq Scan -> Index Only Scan
+Q3 | 65.148 | 62.457 | Seq Scan -> Seq Scan
+Q4 | 39.524 | 33.703 | Seq Scan -> Index Only Scan
+Q5 | 47.440 | 35.279 | Seq Scan -> Index Only Scan
+Q6 | 43.507 | 46.535 | Seq Scan -> Seq Scan
+Q7 | 18.184 | 19.593 | Seq Scan -> Seq Scan
+Q8 | 50.550 | 29.689 | Seq Scan -> Index Only Scan
+Q9 | 2.882 | 0.350 | Bitmap Heap Scan -> Bitmap Heap Scan
+Q10 | 9.429 | 0.311 | Seq Scan -> Index Only Scan
+
+Note: Q2-Q8 read the whole history, so an index cannot help much and the planner correctly keeps
+Seq Scan; run-to-run noise of a few ms is normal. Q9 and Q10 are selective, which is where indexes win.

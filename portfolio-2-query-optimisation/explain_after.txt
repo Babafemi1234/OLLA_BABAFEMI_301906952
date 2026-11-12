@@ -1,0 +1,285 @@
+=== Q1 AFTER ===
+                                                                             QUERY PLAN                                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=2005.63..2005.64 rows=6 width=20) (actual time=0.214..0.215 rows=6 loops=1)
+   Sort Key: s.window_start
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=10 read=3
+   ->  Merge Left Join  (cost=25.83..2005.55 rows=6 width=20) (actual time=0.182..0.200 rows=6 loops=1)
+         Merge Cond: (s.slot_id = laundry_order.slot_id)
+         Buffers: shared hit=5 read=3
+         ->  Sort  (cost=25.54..25.55 rows=6 width=16) (actual time=0.035..0.035 rows=6 loops=1)
+               Sort Key: s.slot_id
+               Sort Method: quicksort  Memory: 25kB
+               Buffers: shared hit=4
+               ->  Bitmap Heap Scan on pickup_slot s  (cost=4.35..25.46 rows=6 width=16) (actual time=0.025..0.028 rows=6 loops=1)
+                     Recheck Cond: ((area_id = 1) AND (slot_date = (CURRENT_DATE + 7)))
+                     Heap Blocks: exact=2
+                     Buffers: shared hit=4
+                     ->  Bitmap Index Scan on idx_slot_lookup  (cost=0.00..4.35 rows=6 width=0) (actual time=0.015..0.015 rows=6 loops=1)
+                           Index Cond: ((area_id = 1) AND (slot_date = (CURRENT_DATE + 7)))
+                           Buffers: shared hit=2
+         ->  GroupAggregate  (cost=0.29..1761.58 rows=17467 width=12) (actual time=0.049..0.152 rows=185 loops=1)
+               Group Key: laundry_order.slot_id
+               Buffers: shared hit=1 read=3
+               ->  Index Only Scan using ix_order_slot_active on laundry_order  (cost=0.29..1296.26 rows=58131 width=4) (actual time=0.045..0.088 rows=573 loops=1)
+                     Heap Fetches: 0
+                     Buffers: shared hit=1 read=3
+ Planning:
+   Buffers: shared hit=361
+ Planning Time: 0.865 ms
+ Execution Time: 0.280 ms
+(28 rows)
+
+=== Q2 AFTER ===
+                                                                                QUERY PLAN                                                                                 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=11394.51..11552.45 rows=63174 width=64) (actual time=32.034..32.041 rows=125 loops=1)
+   Sort Key: out2.name, (to_char((date_trunc('month'::text, o.booked_at)), 'YYYY-MM'::text))
+   Sort Method: quicksort  Memory: 33kB
+   Buffers: shared hit=37 read=213
+   ->  HashAggregate  (cost=2875.27..3980.82 rows=63174 width=64) (actual time=31.709..31.948 rows=125 loops=1)
+         Group Key: out2.name, date_trunc('month'::text, o.booked_at)
+         Batches: 1  Memory Usage: 1569kB
+         Buffers: shared hit=34 read=213
+         ->  Hash Join  (cost=1.53..2401.47 rows=63174 width=32) (actual time=0.050..22.271 rows=63174 loops=1)
+               Hash Cond: (o.outlet_id = out2.outlet_id)
+               Buffers: shared hit=34 read=213
+               ->  Index Only Scan using ix_order_outlet_booked on laundry_order o  (cost=0.41..1936.02 rows=63174 width=12) (actual time=0.030..6.825 rows=63174 loops=1)
+                     Heap Fetches: 0
+                     Buffers: shared hit=33 read=213
+               ->  Hash  (cost=1.05..1.05 rows=5 width=20) (actual time=0.007..0.008 rows=5 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on outlet out2  (cost=0.00..1.05 rows=5 width=20) (actual time=0.004..0.004 rows=5 loops=1)
+                           Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=63
+ Planning Time: 0.223 ms
+ Execution Time: 32.873 ms
+(23 rows)
+
+=== Q3 AFTER ===
+                                                                    QUERY PLAN                                                                     
+---------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=8547.65..8547.66 rows=5 width=38) (actual time=62.404..62.409 rows=5 loops=1)
+   Sort Key: (sum(p.amount)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=5492
+   ->  HashAggregate  (cost=8547.53..8547.59 rows=5 width=38) (actual time=62.386..62.392 rows=5 loops=1)
+         Group Key: a.name
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=5489
+         ->  Hash Join  (cost=2316.61..8257.42 rows=58022 width=11) (actual time=18.383..52.205 rows=58188 loops=1)
+               Hash Cond: (c.area_id = a.area_id)
+               Buffers: shared hit=5489
+               ->  Hash Join  (cost=2315.50..7974.91 rows=58022 width=9) (actual time=18.368..45.224 rows=58188 loops=1)
+                     Hash Cond: (o.customer_id = c.customer_id)
+                     Buffers: shared hit=5488
+                     ->  Hash Join  (cost=2313.83..7799.41 rows=58022 width=9) (actual time=18.343..38.129 rows=58188 loops=1)
+                           Hash Cond: (o.order_id = p.order_id)
+                           Buffers: shared hit=5487
+                           ->  Seq Scan on laundry_order o  (cost=0.00..5319.74 rows=63174 width=12) (actual time=0.019..7.782 rows=63174 loops=1)
+                                 Buffers: shared hit=4688
+                           ->  Hash  (cost=1588.55..1588.55 rows=58022 width=13) (actual time=17.891..17.893 rows=58188 loops=1)
+                                 Buckets: 65536  Batches: 1  Memory Usage: 3240kB
+                                 Buffers: shared hit=799
+                                 ->  Seq Scan on payment p  (cost=0.00..1588.55 rows=58022 width=13) (actual time=0.007..9.225 rows=58188 loops=1)
+                                       Filter: (status = 'paid'::text)
+                                       Rows Removed by Filter: 4976
+                                       Buffers: shared hit=799
+                     ->  Hash  (cost=1.30..1.30 rows=30 width=8) (actual time=0.009..0.009 rows=30 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on customer c  (cost=0.00..1.30 rows=30 width=8) (actual time=0.002..0.005 rows=30 loops=1)
+                                 Buffers: shared hit=1
+               ->  Hash  (cost=1.05..1.05 rows=5 width=10) (actual time=0.008..0.008 rows=5 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on area a  (cost=0.00..1.05 rows=5 width=10) (actual time=0.004..0.004 rows=5 loops=1)
+                           Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=326
+ Planning Time: 0.903 ms
+ Execution Time: 62.457 ms
+(40 rows)
+
+=== Q4 AFTER ===
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=2715.32..2715.34 rows=5 width=32) (actual time=33.674..33.676 rows=5 loops=1)
+   Sort Key: (avg((o.delivered_at - o.picked_up_at))) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=39 read=253 written=137
+   ->  HashAggregate  (cost=2715.20..2715.27 rows=5 width=32) (actual time=33.661..33.664 rows=5 loops=1)
+         Group Key: out2.name
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=34 read=253 written=137
+         ->  Hash Join  (cost=1.53..2285.86 rows=57246 width=32) (actual time=0.046..15.780 rows=57257 loops=1)
+               Hash Cond: (o.outlet_id = out2.outlet_id)
+               Buffers: shared hit=34 read=253 written=137
+               ->  Index Only Scan using ix_order_delivered_outlet on laundry_order o  (cost=0.41..2007.11 rows=57246 width=20) (actual time=0.034..7.665 rows=57257 loops=1)
+                     Heap Fetches: 0
+                     Buffers: shared hit=33 read=253 written=137
+               ->  Hash  (cost=1.05..1.05 rows=5 width=20) (actual time=0.008..0.009 rows=5 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on outlet out2  (cost=0.00..1.05 rows=5 width=20) (actual time=0.003..0.003 rows=5 loops=1)
+                           Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=37
+ Planning Time: 0.252 ms
+ Execution Time: 33.703 ms
+(23 rows)
+
+=== Q5 AFTER ===
+                                                                                       QUERY PLAN                                                                                       
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=3045.77..3045.80 rows=10 width=26) (actual time=35.249..35.252 rows=10 loops=1)
+   Buffers: shared hit=6 read=103 written=103
+   ->  Sort  (cost=3045.77..3045.92 rows=60 width=26) (actual time=35.247..35.249 rows=10 loops=1)
+         Sort Key: (count(*)) DESC
+         Sort Method: top-N heapsort  Memory: 26kB
+         Buffers: shared hit=6 read=103 written=103
+         ->  HashAggregate  (cost=3043.88..3044.48 rows=60 width=26) (actual time=35.222..35.230 rows=60 loops=1)
+               Group Key: r.rider_id
+               Batches: 1  Memory Usage: 24kB
+               Buffers: shared hit=3 read=103 written=103
+               ->  Hash Join  (cost=2.64..2469.31 rows=114914 width=18) (actual time=0.074..23.052 rows=114914 loops=1)
+                     Hash Cond: (ra.rider_id = r.rider_id)
+                     Buffers: shared hit=3 read=103 written=103
+                     ->  Index Only Scan using ix_assignment_rider_kind on rider_assignment ra  (cost=0.29..2144.00 rows=114914 width=4) (actual time=0.051..8.541 rows=114914 loops=1)
+                           Heap Fetches: 74
+                           Buffers: shared hit=2 read=103 written=103
+                     ->  Hash  (cost=1.60..1.60 rows=60 width=18) (actual time=0.020..0.021 rows=60 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 12kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on rider r  (cost=0.00..1.60 rows=60 width=18) (actual time=0.004..0.008 rows=60 loops=1)
+                                 Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=152
+ Planning Time: 0.445 ms
+ Execution Time: 35.279 ms
+(25 rows)
+
+=== Q6 AFTER ===
+                                                                       QUERY PLAN                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=4249.33..4249.37 rows=13 width=22) (actual time=43.908..46.503 rows=13 loops=1)
+   Sort Key: (sum(quantity)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=1641
+   ->  Finalize GroupAggregate  (cost=4247.37..4249.09 rows=13 width=22) (actual time=43.890..46.497 rows=13 loops=1)
+         Group Key: garment_type
+         Buffers: shared hit=1641
+         ->  Gather Merge  (cost=4247.37..4248.87 rows=13 width=22) (actual time=43.884..46.484 rows=26 loops=1)
+               Workers Planned: 1
+               Workers Launched: 1
+               Buffers: shared hit=1641
+               ->  Sort  (cost=3247.36..3247.39 rows=13 width=22) (actual time=37.435..37.437 rows=13 loops=2)
+                     Sort Key: garment_type
+                     Sort Method: quicksort  Memory: 25kB
+                     Buffers: shared hit=1641
+                     Worker 0:  Sort Method: quicksort  Memory: 25kB
+                     ->  Partial HashAggregate  (cost=3246.99..3247.12 rows=13 width=22) (actual time=37.403..37.406 rows=13 loops=2)
+                           Group Key: garment_type
+                           Batches: 1  Memory Usage: 24kB
+                           Buffers: shared hit=1632
+                           Worker 0:  Batches: 1  Memory Usage: 24kB
+                           ->  Parallel Seq Scan on order_item  (cost=0.00..2554.85 rows=92285 width=10) (actual time=0.018..10.150 rows=78442 loops=2)
+                                 Buffers: shared hit=1632
+ Planning:
+   Buffers: shared hit=67
+ Planning Time: 0.188 ms
+ Execution Time: 46.535 ms
+(27 rows)
+
+=== Q7 AFTER ===
+                                                       QUERY PLAN                                                        
+-------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=2023.81..2023.82 rows=4 width=46) (actual time=19.571..19.572 rows=4 loops=1)
+   Sort Key: (sum(amount)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=799
+   ->  HashAggregate  (cost=2023.72..2023.77 rows=4 width=46) (actual time=19.563..19.565 rows=4 loops=1)
+         Group Key: method
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=799
+         ->  Seq Scan on payment  (cost=0.00..1588.55 rows=58022 width=11) (actual time=0.005..7.740 rows=58188 loops=1)
+               Filter: (status = 'paid'::text)
+               Rows Removed by Filter: 4976
+               Buffers: shared hit=799
+ Planning Time: 0.105 ms
+ Execution Time: 19.593 ms
+(14 rows)
+
+=== Q8 AFTER ===
+                                                                                    QUERY PLAN                                                                                     
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=2314.19..2314.21 rows=5 width=22) (actual time=29.656..29.659 rows=5 loops=1)
+   Sort Key: (count(*) FILTER (WHERE (o.status = 'CANCELLED'::text))) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=3 read=58 written=58
+   ->  HashAggregate  (cost=2314.08..2314.13 rows=5 width=22) (actual time=29.649..29.652 rows=5 loops=1)
+         Group Key: a.name
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=3 read=58 written=58
+         ->  Hash Join  (cost=3.08..1682.34 rows=63174 width=15) (actual time=0.068..20.102 rows=63174 loops=1)
+               Hash Cond: (c.area_id = a.area_id)
+               Buffers: shared hit=3 read=58 written=58
+               ->  Hash Join  (cost=1.97..1374.84 rows=63174 width=13) (actual time=0.051..12.503 rows=63174 loops=1)
+                     Hash Cond: (o.customer_id = c.customer_id)
+                     Buffers: shared hit=2 read=58 written=58
+                     ->  Index Only Scan using ix_order_customer_status on laundry_order o  (cost=0.29..1183.90 rows=63174 width=13) (actual time=0.035..4.573 rows=63174 loops=1)
+                           Heap Fetches: 0
+                           Buffers: shared hit=1 read=58 written=58
+                     ->  Hash  (cost=1.30..1.30 rows=30 width=8) (actual time=0.009..0.010 rows=30 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on customer c  (cost=0.00..1.30 rows=30 width=8) (actual time=0.002..0.005 rows=30 loops=1)
+                                 Buffers: shared hit=1
+               ->  Hash  (cost=1.05..1.05 rows=5 width=10) (actual time=0.013..0.014 rows=5 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on area a  (cost=0.00..1.05 rows=5 width=10) (actual time=0.004..0.005 rows=5 loops=1)
+                           Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=8
+ Planning Time: 0.218 ms
+ Execution Time: 29.689 ms
+(31 rows)
+
+=== Q9 AFTER (selective: one outlet, last 30 days) ===
+                                                                QUERY PLAN                                                                
+------------------------------------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=2154.13..2154.19 rows=6 width=17) (actual time=0.330..0.331 rows=6 loops=1)
+   Group Key: status
+   Batches: 1  Memory Usage: 24kB
+   Buffers: shared hit=66
+   ->  Bitmap Heap Scan on laundry_order  (cost=24.81..2150.03 rows=819 width=9) (actual time=0.045..0.203 rows=850 loops=1)
+         Recheck Cond: ((outlet_id = 1) AND (booked_at >= (now() - '30 days'::interval)))
+         Heap Blocks: exact=60
+         Buffers: shared hit=66
+         ->  Bitmap Index Scan on ix_order_outlet_booked  (cost=0.00..24.61 rows=819 width=0) (actual time=0.037..0.037 rows=850 loops=1)
+               Index Cond: ((outlet_id = 1) AND (booked_at >= (now() - '30 days'::interval)))
+               Buffers: shared hit=6
+ Planning:
+   Buffers: shared hit=3
+ Planning Time: 0.122 ms
+ Execution Time: 0.350 ms
+(15 rows)
+
+=== Q10 AFTER (selective: one customer) ===
+                                                                        QUERY PLAN                                                                        
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=0.29..51.28 rows=6 width=17) (actual time=0.020..0.297 rows=6 loops=1)
+   Group Key: status
+   Buffers: shared hit=5
+   ->  Index Only Scan using ix_order_customer_status on laundry_order  (cost=0.29..41.68 rows=1908 width=9) (actual time=0.012..0.150 rows=1892 loops=1)
+         Index Cond: (customer_id = 5)
+         Heap Fetches: 0
+         Buffers: shared hit=5
+ Planning Time: 0.081 ms
+ Execution Time: 0.311 ms
+(9 rows)
+
