@@ -1,0 +1,48 @@
+=== 1. Who is who ===
+-- PRIMARY (port 5432):
+ port | is_replica 
+------+------------
+ 5432 | f
+(1 row)
+
+-- REPLICA (port 5433):
+ port | is_replica 
+------+------------
+ 5433 | t
+(1 row)
+
+
+=== 2. A write on the REPLICA must be rejected (read-only standby) ===
+ERROR:  cannot execute INSERT in a read-only transaction
+-> rejected as expected (replica is read-only)
+
+=== 3. Insert on the PRIMARY ===
+ customer_id |            email            
+-------------+-----------------------------
+          36 | repl.1794488558@example.com
+(1 row)
+
+INSERT 0 1
+
+=== 4. The row arrives on the REPLICA (streamed WAL) ===
+ customer_id |      full_name      |            email            
+-------------+---------------------+-----------------------------
+          36 | Replica Stream Test | repl.1794488558@example.com
+(1 row)
+
+
+=== 5. Replication status (PRIMARY view) ===
+ application_name |   state   | sync_state | replay_lag_bytes 
+------------------+-----------+------------+------------------
+ replica          | streaming | async      |                0
+(1 row)
+
+
+=== 6. Replica replay delay (REPLICA view) ===
+ replayed_lsn |     delay      
+--------------+----------------
+ 0/1C003618   | 00:00:01.09676
+(1 row)
+
+
+Replication demo complete.

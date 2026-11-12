@@ -1,0 +1,318 @@
+============================================================
+ Portfolio 5 — Distributed and Cloud Database Exercise
+============================================================
+[1/3] Partitioning the orders table by month ...
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-5-distributed-cloud/01_partitioning.sql:29: NOTICE:  table "laundry_order_p" does not exist, skipping
+DROP TABLE
+CREATE TABLE
+DO
+CREATE TABLE
+INSERT 0 63179
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+====================================================
+ Rows per month in the partitioned table (laundry_order_p)
+====================================================
+  month  | rows 
+---------+------
+ 2024-11 | 1622
+ 2024-12 | 2629
+ 2025-01 | 2604
+ 2025-02 | 2276
+ 2025-03 | 2611
+ 2025-04 | 2762
+ 2025-05 | 2665
+ 2025-06 | 2632
+ 2025-07 | 2673
+ 2025-08 | 2609
+ 2025-09 | 2624
+ 2025-10 | 2600
+ 2025-11 | 2547
+ 2025-12 | 2640
+ 2026-01 | 2655
+ 2026-02 | 2354
+ 2026-03 | 2496
+ 2026-04 | 2643
+ 2026-05 | 2681
+ 2026-06 | 2687
+ 2026-07 | 2725
+ 2026-08 | 2647
+ 2026-09 | 2680
+ 2026-10 | 2579
+ 2026-11 | 1538
+(25 rows)
+
+
+----------------------------------------------------
+ Partitions created:
+----------------------------------------------------
+        partition        |                                  bound                                   
+-------------------------+--------------------------------------------------------------------------
+ laundry_order_p_202411  | FOR VALUES FROM ('2024-11-01 00:00:00+01') TO ('2024-12-01 00:00:00+01')
+ laundry_order_p_202412  | FOR VALUES FROM ('2024-12-01 00:00:00+01') TO ('2025-01-01 00:00:00+01')
+ laundry_order_p_202501  | FOR VALUES FROM ('2025-01-01 00:00:00+01') TO ('2025-02-01 00:00:00+01')
+ laundry_order_p_202502  | FOR VALUES FROM ('2025-02-01 00:00:00+01') TO ('2025-03-01 00:00:00+01')
+ laundry_order_p_202503  | FOR VALUES FROM ('2025-03-01 00:00:00+01') TO ('2025-04-01 00:00:00+01')
+ laundry_order_p_202504  | FOR VALUES FROM ('2025-04-01 00:00:00+01') TO ('2025-05-01 00:00:00+01')
+ laundry_order_p_202505  | FOR VALUES FROM ('2025-05-01 00:00:00+01') TO ('2025-06-01 00:00:00+01')
+ laundry_order_p_202506  | FOR VALUES FROM ('2025-06-01 00:00:00+01') TO ('2025-07-01 00:00:00+01')
+ laundry_order_p_202507  | FOR VALUES FROM ('2025-07-01 00:00:00+01') TO ('2025-08-01 00:00:00+01')
+ laundry_order_p_202508  | FOR VALUES FROM ('2025-08-01 00:00:00+01') TO ('2025-09-01 00:00:00+01')
+ laundry_order_p_202509  | FOR VALUES FROM ('2025-09-01 00:00:00+01') TO ('2025-10-01 00:00:00+01')
+ laundry_order_p_202510  | FOR VALUES FROM ('2025-10-01 00:00:00+01') TO ('2025-11-01 00:00:00+01')
+ laundry_order_p_202511  | FOR VALUES FROM ('2025-11-01 00:00:00+01') TO ('2025-12-01 00:00:00+01')
+ laundry_order_p_202512  | FOR VALUES FROM ('2025-12-01 00:00:00+01') TO ('2026-01-01 00:00:00+01')
+ laundry_order_p_202601  | FOR VALUES FROM ('2026-01-01 00:00:00+01') TO ('2026-02-01 00:00:00+01')
+ laundry_order_p_202602  | FOR VALUES FROM ('2026-02-01 00:00:00+01') TO ('2026-03-01 00:00:00+01')
+ laundry_order_p_202603  | FOR VALUES FROM ('2026-03-01 00:00:00+01') TO ('2026-04-01 00:00:00+01')
+ laundry_order_p_202604  | FOR VALUES FROM ('2026-04-01 00:00:00+01') TO ('2026-05-01 00:00:00+01')
+ laundry_order_p_202605  | FOR VALUES FROM ('2026-05-01 00:00:00+01') TO ('2026-06-01 00:00:00+01')
+ laundry_order_p_202606  | FOR VALUES FROM ('2026-06-01 00:00:00+01') TO ('2026-07-01 00:00:00+01')
+ laundry_order_p_202607  | FOR VALUES FROM ('2026-07-01 00:00:00+01') TO ('2026-08-01 00:00:00+01')
+ laundry_order_p_202608  | FOR VALUES FROM ('2026-08-01 00:00:00+01') TO ('2026-09-01 00:00:00+01')
+ laundry_order_p_202609  | FOR VALUES FROM ('2026-09-01 00:00:00+01') TO ('2026-10-01 00:00:00+01')
+ laundry_order_p_202610  | FOR VALUES FROM ('2026-10-01 00:00:00+01') TO ('2026-11-01 00:00:00+01')
+ laundry_order_p_202611  | FOR VALUES FROM ('2026-11-01 00:00:00+01') TO ('2026-12-01 00:00:00+01')
+ laundry_order_p_202612  | FOR VALUES FROM ('2026-12-01 00:00:00+01') TO ('2027-01-01 00:00:00+01')
+ laundry_order_p_202701  | FOR VALUES FROM ('2027-01-01 00:00:00+01') TO ('2027-02-01 00:00:00+01')
+ laundry_order_p_202702  | FOR VALUES FROM ('2027-02-01 00:00:00+01') TO ('2027-03-01 00:00:00+01')
+ laundry_order_p_202703  | FOR VALUES FROM ('2027-03-01 00:00:00+01') TO ('2027-04-01 00:00:00+01')
+ laundry_order_p_202704  | FOR VALUES FROM ('2027-04-01 00:00:00+01') TO ('2027-05-01 00:00:00+01')
+ laundry_order_p_202705  | FOR VALUES FROM ('2027-05-01 00:00:00+01') TO ('2027-06-01 00:00:00+01')
+ laundry_order_p_202706  | FOR VALUES FROM ('2027-06-01 00:00:00+01') TO ('2027-07-01 00:00:00+01')
+ laundry_order_p_202707  | FOR VALUES FROM ('2027-07-01 00:00:00+01') TO ('2027-08-01 00:00:00+01')
+ laundry_order_p_202708  | FOR VALUES FROM ('2027-08-01 00:00:00+01') TO ('2027-09-01 00:00:00+01')
+ laundry_order_p_202709  | FOR VALUES FROM ('2027-09-01 00:00:00+01') TO ('2027-10-01 00:00:00+01')
+ laundry_order_p_202710  | FOR VALUES FROM ('2027-10-01 00:00:00+01') TO ('2027-11-01 00:00:00+01')
+ laundry_order_p_202711  | FOR VALUES FROM ('2027-11-01 00:00:00+01') TO ('2027-12-01 00:00:00+01')
+ laundry_order_p_default | DEFAULT
+(38 rows)
+
+
+====================================================
+ Partition pruning EXPLAIN (only the last 3 months scanned)
+====================================================
+                                                                                                  QUERY PLAN                                                                                                   
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize Aggregate  (cost=4282.89..4282.90 rows=1 width=40) (actual time=23.622..25.327 rows=1 loops=1)
+   Buffers: shared hit=23835 read=23
+   ->  Gather  (cost=4282.66..4282.87 rows=2 width=40) (actual time=23.611..25.317 rows=3 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=23835 read=23
+         ->  Partial Aggregate  (cost=3282.66..3282.67 rows=1 width=40) (actual time=12.491..12.493 rows=1 loops=3)
+               Buffers: shared hit=23835 read=23
+               ->  Nested Loop  (cost=9.25..3281.95 rows=141 width=5) (actual time=0.062..11.970 rows=2635 loops=3)
+                     Buffers: shared hit=23835 read=23
+                     ->  Parallel Append  (cost=8.96..2405.79 rows=155 width=8) (actual time=0.014..4.339 rows=2635 loops=3)
+                           Buffers: shared hit=138
+                           Subplans Removed: 35
+                           ->  Parallel Seq Scan on laundry_order_p_202609 p_2  (cost=0.00..94.29 rows=8 width=8) (actual time=0.017..2.518 rows=2680 loops=1)
+                                 Filter: ((booked_at >= date_trunc('month'::text, (CURRENT_DATE - '3 mons'::interval))) AND (booked_at < date_trunc('month'::text, (CURRENT_DATE)::timestamp with time zone)))
+                                 Buffers: shared hit=47
+                           ->  Parallel Seq Scan on laundry_order_p_202608 p_1  (cost=0.00..92.71 rows=8 width=8) (actual time=0.009..1.815 rows=882 loops=3)
+                                 Filter: ((booked_at >= date_trunc('month'::text, (CURRENT_DATE - '3 mons'::interval))) AND (booked_at < date_trunc('month'::text, (CURRENT_DATE)::timestamp with time zone)))
+                                 Buffers: shared hit=46
+                           ->  Parallel Seq Scan on laundry_order_p_202610 p_3  (cost=0.00..90.51 rows=8 width=8) (actual time=0.011..2.242 rows=2579 loops=1)
+                                 Filter: ((booked_at >= date_trunc('month'::text, (CURRENT_DATE - '3 mons'::interval))) AND (booked_at < date_trunc('month'::text, (CURRENT_DATE)::timestamp with time zone)))
+                                 Buffers: shared hit=45
+                     ->  Index Scan using payment_order_id_key on payment pt  (cost=0.29..5.65 rows=1 width=13) (actual time=0.002..0.002 rows=1 loops=7906)
+                           Index Cond: (order_id = p.order_id)
+                           Buffers: shared hit=23697 read=23
+ Planning:
+   Buffers: shared hit=220 read=1
+ Planning Time: 4.197 ms
+ Execution Time: 25.406 ms
+(29 rows)
+
+
+====================================================
+ Full-scan EXPLAIN (no date filter -> scans every partition)
+====================================================
+                                                                      QUERY PLAN                                                                      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=2448.83..2448.84 rows=1 width=8) (actual time=12.906..12.913 rows=1 loops=1)
+   Buffers: shared hit=1104
+   ->  Append  (cost=0.00..2275.28 rows=69419 width=0) (actual time=0.005..10.182 rows=63179 loops=1)
+         Buffers: shared hit=1104
+         ->  Seq Scan on laundry_order_p_202411 laundry_order_p_1  (cost=0.00..45.22 rows=1622 width=0) (actual time=0.004..0.121 rows=1622 loops=1)
+               Buffers: shared hit=29
+         ->  Seq Scan on laundry_order_p_202412 laundry_order_p_2  (cost=0.00..72.29 rows=2629 width=0) (actual time=0.003..0.212 rows=2629 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202501 laundry_order_p_3  (cost=0.00..72.04 rows=2604 width=0) (actual time=0.003..0.197 rows=2604 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202502 laundry_order_p_4  (cost=0.00..62.76 rows=2276 width=0) (actual time=0.003..0.166 rows=2276 loops=1)
+               Buffers: shared hit=40
+         ->  Seq Scan on laundry_order_p_202503 laundry_order_p_5  (cost=0.00..72.11 rows=2611 width=0) (actual time=0.003..0.188 rows=2611 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202504 laundry_order_p_6  (cost=0.00..75.62 rows=2762 width=0) (actual time=0.003..0.202 rows=2762 loops=1)
+               Buffers: shared hit=48
+         ->  Seq Scan on laundry_order_p_202505 laundry_order_p_7  (cost=0.00..73.65 rows=2665 width=0) (actual time=0.003..0.192 rows=2665 loops=1)
+               Buffers: shared hit=47
+         ->  Seq Scan on laundry_order_p_202506 laundry_order_p_8  (cost=0.00..72.32 rows=2632 width=0) (actual time=0.003..0.197 rows=2632 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202507 laundry_order_p_9  (cost=0.00..73.73 rows=2673 width=0) (actual time=0.003..0.197 rows=2673 loops=1)
+               Buffers: shared hit=47
+         ->  Seq Scan on laundry_order_p_202508 laundry_order_p_10  (cost=0.00..72.09 rows=2609 width=0) (actual time=0.003..0.189 rows=2609 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202509 laundry_order_p_11  (cost=0.00..72.24 rows=2624 width=0) (actual time=0.003..0.302 rows=2624 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202510 laundry_order_p_12  (cost=0.00..71.00 rows=2600 width=0) (actual time=0.006..0.317 rows=2600 loops=1)
+               Buffers: shared hit=45
+         ->  Seq Scan on laundry_order_p_202511 laundry_order_p_13  (cost=0.00..70.47 rows=2547 width=0) (actual time=0.006..0.304 rows=2547 loops=1)
+               Buffers: shared hit=45
+         ->  Seq Scan on laundry_order_p_202512 laundry_order_p_14  (cost=0.00..72.40 rows=2640 width=0) (actual time=0.007..0.269 rows=2640 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202601 laundry_order_p_15  (cost=0.00..72.55 rows=2655 width=0) (actual time=0.003..0.227 rows=2655 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202602 laundry_order_p_16  (cost=0.00..64.54 rows=2354 width=0) (actual time=0.003..0.170 rows=2354 loops=1)
+               Buffers: shared hit=41
+         ->  Seq Scan on laundry_order_p_202603 laundry_order_p_17  (cost=0.00..68.96 rows=2496 width=0) (actual time=0.003..0.189 rows=2496 loops=1)
+               Buffers: shared hit=44
+         ->  Seq Scan on laundry_order_p_202604 laundry_order_p_18  (cost=0.00..72.43 rows=2643 width=0) (actual time=0.004..0.197 rows=2643 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202605 laundry_order_p_19  (cost=0.00..73.81 rows=2681 width=0) (actual time=0.003..0.211 rows=2681 loops=1)
+               Buffers: shared hit=47
+         ->  Seq Scan on laundry_order_p_202606 laundry_order_p_20  (cost=0.00..73.87 rows=2687 width=0) (actual time=0.004..0.194 rows=2687 loops=1)
+               Buffers: shared hit=47
+         ->  Seq Scan on laundry_order_p_202607 laundry_order_p_21  (cost=0.00..75.25 rows=2725 width=0) (actual time=0.003..0.197 rows=2725 loops=1)
+               Buffers: shared hit=48
+         ->  Seq Scan on laundry_order_p_202608 laundry_order_p_22  (cost=0.00..72.47 rows=2647 width=0) (actual time=0.003..0.202 rows=2647 loops=1)
+               Buffers: shared hit=46
+         ->  Seq Scan on laundry_order_p_202609 laundry_order_p_23  (cost=0.00..73.80 rows=2680 width=0) (actual time=0.003..0.195 rows=2680 loops=1)
+               Buffers: shared hit=47
+         ->  Seq Scan on laundry_order_p_202610 laundry_order_p_24  (cost=0.00..70.79 rows=2579 width=0) (actual time=0.004..0.194 rows=2579 loops=1)
+               Buffers: shared hit=45
+         ->  Seq Scan on laundry_order_p_202611 laundry_order_p_25  (cost=0.00..39.38 rows=1538 width=0) (actual time=0.004..0.109 rows=1538 loops=1)
+               Buffers: shared hit=24
+         ->  Seq Scan on laundry_order_p_202612 laundry_order_p_26  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202701 laundry_order_p_27  (cost=0.00..14.80 rows=480 width=0) (actual time=0.003..0.003 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202702 laundry_order_p_28  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202703 laundry_order_p_29  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202704 laundry_order_p_30  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202705 laundry_order_p_31  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202706 laundry_order_p_32  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202707 laundry_order_p_33  (cost=0.00..14.80 rows=480 width=0) (actual time=0.002..0.002 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202708 laundry_order_p_34  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202709 laundry_order_p_35  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.002 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202710 laundry_order_p_36  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_202711 laundry_order_p_37  (cost=0.00..14.80 rows=480 width=0) (actual time=0.002..0.002 rows=0 loops=1)
+         ->  Seq Scan on laundry_order_p_default laundry_order_p_38  (cost=0.00..14.80 rows=480 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+ Planning:
+   Buffers: shared hit=52
+ Planning Time: 0.749 ms
+ Execution Time: 12.956 ms
+(71 rows)
+
+
+====================================================
+ Compare row counts: flat vs partitioned (must match)
+====================================================
+ flat_count | partitioned_count 
+------------+-------------------
+      63179 |             63179
+(1 row)
+
+
+Rows that fell into the DEFAULT partition (must be 0):
+ rows_in_default_partition 
+---------------------------
+                         0
+(1 row)
+
+====================================================
+ Partitioning demo complete.
+ Paste your real EXPLAIN plans + the per-partition row
+ counts into the LMS evidence.
+====================================================
+[2/3] Setting up the streaming read replica (primary 5432, replica 5433) ...
+============================================================
+ Portfolio 5 — streaming replica setup (primary 5432, replica 5433)
+============================================================
+[1/7] configuring primary for replication ...
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ pg_reload_conf 
+----------------
+ t
+(1 row)
+
+[2/7] prepending replication trust lines to the TOP of pg_hba.conf ...
+  prepended trust block to /etc/postgresql/16/main/pg_hba.conf
+[3/7] restarting the primary ...
+[4/7] creating replication role 'replicator' ...
+CREATE ROLE
+[5/7] taking a fresh base backup of the primary into /var/lib/postgresql/16/replica ...
+waiting for checkpoint
+195357/195357 kB (100%), 0/1 tablespace
+195357/195357 kB (100%), 1/1 tablespace
+[6/7] copying + adjusting the replica's postgresql.conf ...
+[7/7] starting the replica ...
+waiting for server to start.... done
+server started
+============================================================
+ Replica setup complete.
+   PRIMARY  : port 5432  (socket /var/run/postgresql)
+   REPLICA  : port 5433  (socket /var/run/postgresql)
+============================================================
+Verify (run as the postgres OS user):
+  sudo runuser -u postgres -- psql -p 5432 -c 'SELECT application_name, state, sync_state FROM pg_stat_replication;'
+  sudo runuser -u postgres -- psql -p 5433 -c 'SELECT pg_is_in_recovery();'
+Then follow 04_replica_test_guide.md to show the replica rejecting
+writes and streaming new rows from the primary.
+[3/3] Replication demo (write rejected on replica, row streams over) ...
+=== 1. Who is who ===
+-- PRIMARY (port 5432):
+ port | is_replica 
+------+------------
+ 5432 | f
+(1 row)
+
+-- REPLICA (port 5433):
+ port | is_replica 
+------+------------
+ 5433 | t
+(1 row)
+
+
+=== 2. A write on the REPLICA must be rejected (read-only standby) ===
+ERROR:  cannot execute INSERT in a read-only transaction
+-> rejected as expected (replica is read-only)
+
+=== 3. Insert on the PRIMARY ===
+ customer_id |            email            
+-------------+-----------------------------
+          36 | repl.1794488558@example.com
+(1 row)
+
+INSERT 0 1
+
+=== 4. The row arrives on the REPLICA (streamed WAL) ===
+ customer_id |      full_name      |            email            
+-------------+---------------------+-----------------------------
+          36 | Replica Stream Test | repl.1794488558@example.com
+(1 row)
+
+
+=== 5. Replication status (PRIMARY view) ===
+ application_name |   state   | sync_state | replay_lag_bytes 
+------------------+-----------+------------+------------------
+ replica          | streaming | async      |                0
+(1 row)
+
+
+=== 6. Replica replay delay (REPLICA view) ===
+ replayed_lsn |     delay      
+--------------+----------------
+ 0/1C003618   | 00:00:01.09676
+(1 row)
+
+
+Replication demo complete.
+============================================================
+ Portfolio 5 complete. Evidence: p5_output.log, replication_output.log
+ Read 05_cloud_architecture.md for the NDPA 2023 / CAP / cloud discussion.
+============================================================

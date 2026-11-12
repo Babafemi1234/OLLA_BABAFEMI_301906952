@@ -1,0 +1,36 @@
+============================================================
+ Portfolio 5 — streaming replica setup (primary 5432, replica 5433)
+============================================================
+[1/7] configuring primary for replication ...
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ pg_reload_conf 
+----------------
+ t
+(1 row)
+
+[2/7] prepending replication trust lines to the TOP of pg_hba.conf ...
+  prepended trust block to /etc/postgresql/16/main/pg_hba.conf
+[3/7] restarting the primary ...
+[4/7] creating replication role 'replicator' ...
+CREATE ROLE
+[5/7] taking a fresh base backup of the primary into /var/lib/postgresql/16/replica ...
+waiting for checkpoint
+195357/195357 kB (100%), 0/1 tablespace
+195357/195357 kB (100%), 1/1 tablespace
+[6/7] copying + adjusting the replica's postgresql.conf ...
+[7/7] starting the replica ...
+waiting for server to start.... done
+server started
+============================================================
+ Replica setup complete.
+   PRIMARY  : port 5432  (socket /var/run/postgresql)
+   REPLICA  : port 5433  (socket /var/run/postgresql)
+============================================================
+Verify (run as the postgres OS user):
+  sudo runuser -u postgres -- psql -p 5432 -c 'SELECT application_name, state, sync_state FROM pg_stat_replication;'
+  sudo runuser -u postgres -- psql -p 5433 -c 'SELECT pg_is_in_recovery();'
+Then follow 04_replica_test_guide.md to show the replica rejecting
+writes and streaming new rows from the primary.
