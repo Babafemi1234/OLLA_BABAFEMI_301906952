@@ -1,0 +1,377 @@
+============================================================
+ Portfolio 4 — NoSQL and Advanced Data Models (MongoDB)
+============================================================
+[1/4] Creating the garments collection with $jsonSchema validator ...
+Running 01_schema_validation.js on database: freshfold
+Collection `freshfold.garments` created with $jsonSchema validator.
+Indexes: order_id, (outlet_id, area).  garment_type index is added in 04_index_demo.js.
+[2/4] Seeding 40,000+ garment documents from PostgreSQL ...
+FreshFold Laundry — MongoDB garment-document seeder
+  target documents: 50000+
+[1] sampling order_items from PostgreSQL ...
+  sampled 50000 order_items
+[2] connecting to MongoDB ...
+[3] inserting garment documents in batches ...
+  inserted 2000 / 50000
+  inserted 4000 / 50000
+  inserted 6000 / 50000
+  inserted 8000 / 50000
+  inserted 10000 / 50000
+  inserted 12000 / 50000
+  inserted 14000 / 50000
+  inserted 16000 / 50000
+  inserted 18000 / 50000
+  inserted 20000 / 50000
+  inserted 22000 / 50000
+  inserted 24000 / 50000
+  inserted 26000 / 50000
+  inserted 28000 / 50000
+  inserted 30000 / 50000
+  inserted 32000 / 50000
+  inserted 34000 / 50000
+  inserted 36000 / 50000
+  inserted 38000 / 50000
+  inserted 40000 / 50000
+  inserted 42000 / 50000
+  inserted 44000 / 50000
+  inserted 46000 / 50000
+  inserted 48000 / 50000
+  inserted 50000 / 50000
+[4] inserted 50000 garment documents
+[5] summary
+  garments.count_documents({}) = 50000   (MUST be >= 40000)
+  per-garment-type `care` field examples (DIFFERENT FIELDS PER GARMENT TYPE):
+     shirt    care = {'iron_temp': 'medium', 'starch': False, 'fold_style': 'folded', 'hang_dry': True}
+     agbada   care = {'iron_temp': 'low', 'starch': True, 'fold_style': 'folded', 'dry_clean_only': True, 'no_bleach': True}
+     duvet    care = {'machine_size': 'king', 'detergent': 'mild', 'dry_time_mins': 75, 'hang_dry': False}
+     suit     care = {'dry_clean_only': True, 'no_bleach': True, 'iron_temp': 'low', 'press_only': True}
+     ankara   care = {'hand_wash_only': True, 'no_bleach': True, 'iron_temp': 'low', 'starch': False}
+Done.
+[3/4] Running aggregations ...
+================================================================
+ Portfolio 4 — MongoDB aggregations on freshfold.garments
+================================================================
+documents in collection: 50000
+
+>> A. Most common stains (top 10)
+[
+  {
+    _id: 'mud',
+    count: 3509,
+    light: 2129,
+    moderate: 1050,
+    heavy: 330
+  },
+  {
+    _id: 'blood',
+    count: 3452,
+    light: 2105,
+    moderate: 985,
+    heavy: 362
+  },
+  {
+    _id: 'perfume',
+    count: 3443,
+    light: 2101,
+    moderate: 1018,
+    heavy: 324
+  },
+  {
+    _id: 'oil',
+    count: 3440,
+    light: 2091,
+    moderate: 1005,
+    heavy: 344
+  },
+  {
+    _id: 'makeup',
+    count: 3440,
+    light: 2082,
+    moderate: 1048,
+    heavy: 310
+  },
+  {
+    _id: 'grass',
+    count: 3437,
+    light: 2110,
+    moderate: 984,
+    heavy: 343
+  },
+  {
+    _id: 'rust',
+    count: 3431,
+    light: 2082,
+    moderate: 1006,
+    heavy: 343
+  },
+  {
+    _id: 'grease',
+    count: 3419,
+    light: 2060,
+    moderate: 1051,
+    heavy: 308
+  },
+  {
+    _id: 'wine',
+    count: 3402,
+    light: 2040,
+    moderate: 1023,
+    heavy: 339
+  },
+  {
+    _id: 'sweat',
+    count: 3395,
+    light: 2037,
+    moderate: 1013,
+    heavy: 345
+  }
+]
+
+>> B. Care requests per fabric
+[
+  {
+    _id: 'cotton',
+    garments: 13199,
+    starch_requests: 1703,
+    hand_wash_only: 1141,
+    dry_clean_only: 513,
+    no_bleach: 2552,
+    hang_dry: 6148,
+    press_only: 0
+  },
+  {
+    _id: 'polyester',
+    garments: 7825,
+    starch_requests: 1085,
+    hand_wash_only: 0,
+    dry_clean_only: 1905,
+    no_bleach: 1905,
+    hang_dry: 2341,
+    press_only: 1905
+  },
+  {
+    _id: 'ankara_wax',
+    garments: 7652,
+    starch_requests: 2188,
+    hand_wash_only: 4710,
+    dry_clean_only: 611,
+    no_bleach: 5160,
+    hang_dry: 0,
+    press_only: 0
+  },
+  {
+    _id: 'chiffon',
+    garments: 3881,
+    starch_requests: 0,
+    hand_wash_only: 761,
+    dry_clean_only: 522,
+    no_bleach: 2559,
+    hang_dry: 1799,
+    press_only: 0
+  },
+  {
+    _id: 'damask',
+    garments: 3873,
+    starch_requests: 2343,
+    hand_wash_only: 784,
+    dry_clean_only: 648,
+    no_bleach: 1298,
+    hang_dry: 0,
+    press_only: 0
+  },
+  {
+    _id: 'linen',
+    garments: 3208,
+    starch_requests: 645,
+    hand_wash_only: 0,
+    dry_clean_only: 0,
+    no_bleach: 0,
+    hang_dry: 2472,
+    press_only: 0
+  },
+  {
+    _id: 'wool',
+    garments: 2853,
+    starch_requests: 475,
+    hand_wash_only: 0,
+    dry_clean_only: 1878,
+    no_bleach: 1878,
+    hang_dry: 0,
+    press_only: 1878
+  },
+  {
+    _id: 'lace',
+    garments: 2596,
+    starch_requests: 1804,
+    hand_wash_only: 420,
+    dry_clean_only: 650,
+    no_bleach: 1296,
+    hang_dry: 0,
+    press_only: 0
+  },
+  {
+    _id: 'silk',
+    garments: 2593,
+    starch_requests: 0,
+    hand_wash_only: 794,
+    dry_clean_only: 538,
+    no_bleach: 2593,
+    hang_dry: 1309,
+    press_only: 0
+  },
+  {
+    _id: 'denim',
+    garments: 2320,
+    starch_requests: 532,
+    hand_wash_only: 0,
+    dry_clean_only: 0,
+    no_bleach: 0,
+    hang_dry: 531,
+    press_only: 0
+  }
+]
+
+>> C1. Damage complaints per outlet (count, resolved, refund_ngn)
+[
+  {
+    _id: 'FreshFold Ikeja',
+    complaints: 979,
+    resolved: 573,
+    total_refund_ngn: 247775.55
+  },
+  {
+    _id: 'FreshFold Lekki',
+    complaints: 967,
+    resolved: 582,
+    total_refund_ngn: 270674.96
+  },
+  {
+    _id: 'FreshFold Yaba',
+    complaints: 587,
+    resolved: 351,
+    total_refund_ngn: 178801
+  },
+  {
+    _id: 'FreshFold Surulere',
+    complaints: 566,
+    resolved: 359,
+    total_refund_ngn: 164952.82
+  },
+  {
+    _id: 'FreshFold Ajah',
+    complaints: 381,
+    resolved: 221,
+    total_refund_ngn: 123011.83
+  }
+]
+
+>> C2. Most common damage issue per outlet
+[
+  {
+    _id: 'FreshFold Ikeja',
+    top_issue: 'stain_persist',
+    top_count: 154
+  },
+  {
+    _id: 'FreshFold Lekki',
+    top_issue: 'tear',
+    top_count: 139
+  },
+  {
+    _id: 'FreshFold Yaba',
+    top_issue: 'tear',
+    top_count: 81
+  },
+  {
+    _id: 'FreshFold Surulere',
+    top_issue: 'missing_item',
+    top_count: 74
+  },
+  {
+    _id: 'FreshFold Ajah',
+    top_issue: 'button_missing',
+    top_count: 61
+  }
+]
+
+>> C3. Most common damage issues overall
+[
+  {
+    _id: 'tear',
+    count: 468
+  },
+  {
+    _id: 'stain_persist',
+    count: 460
+  },
+  {
+    _id: 'shrinkage',
+    count: 447
+  },
+  {
+    _id: 'wrong_fold',
+    count: 441
+  },
+  {
+    _id: 'button_missing',
+    count: 436
+  },
+  {
+    _id: 'burn_mark',
+    count: 432
+  },
+  {
+    _id: 'colour_run',
+    count: 416
+  },
+  {
+    _id: 'missing_item',
+    count: 380
+  }
+]
+
+================================================================
+ End of aggregations. Paste your REAL output into the LMS evidence.
+================================================================
+[4/4] COLLSCAN -> IXSCAN demo ...
+================================================================
+ Portfolio 4 — COLLSCAN -> IXSCAN on freshfold.garments
+ Query: { garment_type: 'agbada' }
+================================================================
+Indexes present BEFORE: ["_id_","order_id_1","outlet_id_1_area_1"]
+
+BEFORE creating the garment_type index:
+>> BEFORE (no garment_type index)
+   winning plan stage (root): COLLSCAN
+   leaf stage:                COLLSCAN
+   nReturned:                 3799
+   totalDocsExamined:         50000
+   totalKeysExamined:         0
+   executionTimeMillis:       19
+
+Creating index { garment_type: 1 } ...
+Indexes present AFTER: ["_id_","order_id_1","outlet_id_1_area_1","garment_type_1"]
+
+AFTER creating the garment_type index:
+>> AFTER (garment_type index)
+   winning plan stage (root): FETCH
+   leaf stage:                IXSCAN
+   nReturned:                 3799
+   totalDocsExamined:         3799
+   totalKeysExamined:         3799
+   executionTimeMillis:       7
+
+================================================================
+ SUMMARY (real numbers from your database)
+   BEFORE: leaf=COLLSCAN, totalDocsExamined=50000, totalKeysExamined=0, executionTimeMillis=19
+   AFTER : leaf=IXSCAN, totalDocsExamined=3799, totalKeysExamined=3799, executionTimeMillis=7
+
+ Expect BEFORE.leaf = COLLSCAN (examines ~ALL documents) and
+ AFTER.leaf  = IXSCAN  (examines only matching documents).
+ Paste these real numbers into your documentation.
+================================================================
+============================================================
+ Portfolio 4 complete.
+ Paste your REAL mongosh output into the LMS evidence and into
+ 05_sql_vs_nosql_comparison.md where applicable.
+============================================================
