@@ -1,0 +1,190 @@
+============================================================
+ Portfolio 1 — Database Design and Modelling (FreshFold)
+============================================================
+[1/4] Creating schema (01_schema.sql) ...
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:36: NOTICE:  table "rider_assignment" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:37: NOTICE:  table "delivery" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:38: NOTICE:  table "payment" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:39: NOTICE:  table "order_item" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:40: NOTICE:  table "laundry_order" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:41: NOTICE:  table "pickup_slot" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:42: NOTICE:  table "rider" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:43: NOTICE:  table "customer" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:44: NOTICE:  table "outlet" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:45: NOTICE:  table "area" does not exist, skipping
+DROP TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:48: NOTICE:  extension "btree_gist" already exists, skipping
+CREATE EXTENSION
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:49: NOTICE:  extension "pg_trgm" already exists, skipping
+CREATE EXTENSION
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE FUNCTION
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:275: NOTICE:  trigger "trg_slot_capacity" for relation "laundry_order" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:329: NOTICE:  trigger "trg_status_transition" for relation "laundry_order" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:368: NOTICE:  trigger "trg_sync_pickup_assignment" for relation "laundry_order" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/01_schema.sql:390: NOTICE:  trigger "trg_sync_delivery_assignment" for relation "delivery" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+CREATE VIEW
+Schema created successfully.
+[2/4] Loading seed data (04_seed_data.sql) ...
+TRUNCATE TABLE
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/04_seed_data.sql:21: NOTICE:  truncate cascades to table "laundry_order"
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/04_seed_data.sql:21: NOTICE:  truncate cascades to table "delivery"
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/04_seed_data.sql:21: NOTICE:  truncate cascades to table "rider_assignment"
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/04_seed_data.sql:21: NOTICE:  truncate cascades to table "order_item"
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/04_seed_data.sql:21: NOTICE:  truncate cascades to table "payment"
+TRUNCATE TABLE
+INSERT 0 5
+INSERT 0 5
+INSERT 0 30
+INSERT 0 12
+INSERT 0 900
+Seed data loaded: 5 areas, 5 outlets, 30 customers, 12 riders, 
+and ~900 pickup slots across the next 30 days.
+ ?column? 
+----------
+ areas=5
+(1 row)
+
+ ?column?  
+-----------
+ outlets=5
+(1 row)
+
+   ?column?   
+--------------
+ customers=30
+(1 row)
+
+ ?column?  
+-----------
+ riders=12
+(1 row)
+
+ ?column?  
+-----------
+ slots=900
+(1 row)
+
+[3/4] Generating 50,000+ bulk orders (05_bulk_generator.py) ...
+FreshFold Laundry bulk generator
+  target orders: 52000+
+[1] ensuring dimension rows (riders)...
+  riders: 48 added to reach 60 active riders
+[2] generating pickup slots across 2 years...
+  ensured 22140 pickup slot rows
+[3] loading dimension ids...
+[4] planning orders in Python (respects capacity + rider rules)...
+  planned 63163 orders
+[5] bulk-inserting laundry_order rows (status=BOOKED)...
+  inserted 63163 orders (status BOOKED)
+[6] inserting order_item rows...
+  inserted 156885 order items
+[7] inserting payment rows...
+  inserted 63163 payments
+[8] advancing order statuses through the lifecycle (batched hops)...
+  hops applied — DELIVERED=57257, CANCELLED=4976, READY=111, WASHING=102, PICKED_UP=185
+[9] inserting delivery rows (this fires the sync_delivery trigger)...
+  inserted 57257 delivery rows
+[10] summary
+  ------------------------------------------------
+  orders           : 63163
+  order items      : 156885
+  payments         : 63163
+  deliveries       : 57257
+  rider assignments: 114912
+  pickup slots     : 22800
+  slots over capacity: 0   (MUST be 0)
+  status breakdown:
+     DELIVERED    57257
+     CANCELLED    4976
+     BOOKED       532
+     PICKED_UP    185
+     READY        111
+     WASHING      102
+  ------------------------------------------------
+Bulk generation complete.
+[4/4] Running constraint tests (06_constraint_tests.sql) ...
+==========================================================
+ Portfolio 1 — constraint tests (each MUST be rejected)
+==========================================================
+DELETE 0
+DELETE 0
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:68: NOTICE:  PASS test 1: slot capacity trigger rejected over-capacity booking
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:104: NOTICE:  PASS test 2: EXCLUDE constraint rejected overlapping pickup for the same rider
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:146: NOTICE:  PASS test 3: EXCLUDE constraint rejected rider pickup vs delivery overlap
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:175: NOTICE:  PASS test 4: CHECK rejected delivery where delivered_at is before picked_up_at
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:208: NOTICE:  PASS test 5: CHECK rejected order_item with quantity = 0
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:208: NOTICE:  PASS test 5b: CHECK rejected order_item with negative quantity
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:241: NOTICE:  PASS test 6: CHECK rejected payment with amount = 0
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:241: NOTICE:  PASS test 6b: CHECK rejected payment with negative amount
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:264: NOTICE:  PASS test 7: status transition trigger rejected BOOKED -> READY
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:284: NOTICE:  PASS test 8: trigger rejected INSERT with initial status WASHING
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:307: NOTICE:  PASS test 9: trigger rejected status change out of terminal CANCELLED
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:320: NOTICE:  PASS test 10: CHECK rejected a slot window that is not 2 hours
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:333: NOTICE:  PASS test 11: CHECK rejected invalid vehicle value
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:356: NOTICE:  PASS test 12: CHECK rejected invalid service value
+DO
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-1-database-design/06_constraint_tests.sql:381: NOTICE:  PASS test 13: UNIQUE rejected a second payment for the same order
+DO
+==========================================================
+ End of constraint tests (every line above should say PASS)
+==========================================================
+============================================================
+ Portfolio 1 complete.
+ Schema, seed data, 50k+ bulk orders and constraint tests are done.
+ Open 02_er_diagram.md and 03_normalisation_notes.md in GitHub to view
+ the ER diagram (Mermaid) and the 3NF explanation.
+============================================================
