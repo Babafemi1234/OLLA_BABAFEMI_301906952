@@ -1,0 +1,99 @@
+============================================================
+ Portfolio 3 — Transactions and Concurrency
+============================================================
+[1/3] Defining book_pickup() + book_pickup_naive() ...
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/01_book_pickup_function.sql:35: NOTICE:  function book_pickup_naive(pg_catalog.int4,pg_catalog.int4,jsonb,text,pg_catalog.numeric,pg_catalog.bool) does not exist, skipping
+DROP FUNCTION
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/01_book_pickup_function.sql:36: NOTICE:  function book_pickup(pg_catalog.int4,pg_catalog.int4,jsonb,text,pg_catalog.numeric,pg_catalog.bool) does not exist, skipping
+DROP FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+book_pickup_naive() and book_pickup() defined.
+[2/3] Running COMMIT/ROLLBACK demo ...
+INSERT 0 1
+INSERT 0 1
+ set_config | set_config 
+------------+------------
+ 421        | 31
+(1 row)
+
+====================================================
+ Demo A — COMMIT (happy path)
+====================================================
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/02_commit_rollback_demo.sql:69: NOTICE:  Demo A: booked order 63178 (payments ok). Orders in slot: 0 -> 1
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/02_commit_rollback_demo.sql:69: NOTICE:    -> Observe: counts increased by 1 (COMMIT worked).
+DO
+DELETE 1
+====================================================
+ Demo B — ROLLBACK (simulated payment failure)
+====================================================
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/02_commit_rollback_demo.sql:109: NOTICE:  Demo B: payment failed -> PAYMENT_FAILED: payment gateway declined the card
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/02_commit_rollback_demo.sql:109: NOTICE:  Demo B: orders in slot: 0 -> 0 (MUST be equal)
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/02_commit_rollback_demo.sql:109: NOTICE:    -> Observe: counts UNCHANGED. The order was rolled back (no orphan order).
+DO
+====================================================
+ Demo C — failed payment CANCELS the order (order persists)
+====================================================
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/02_commit_rollback_demo.sql:157: NOTICE:  Demo C: order 63180 persisted with status=CANCELLED , payment status=failed
+psql:/workspaces/OLLA_BABAFEMI_301906952/portfolio-3-transactions-concurrency/02_commit_rollback_demo.sql:157: NOTICE:    -> Observe: order is CANCELLED and a FAILED payment is recorded. The order PERSISTS (audit trail).
+DO
+====================================================
+ End of COMMIT/ROLLBACK demo.
+====================================================
+[3/3] Preparing the two-terminal race fixture ...
+INSERT 0 1
+DELETE 0
+INSERT 0 4
+INSERT 0 4
+INSERT 0 4
+====================================================
+ Race fixture ready.
+====================================================
+ slot_id | capacity | used | free_spaces 
+---------+----------+------+-------------
+     632 |        5 |    4 |           1
+(1 row)
+
+  The slot should now show capacity=5, used=4, free_spaces=1.
+  Open TWO psql sessions to demonstrate the race (see
+  03_race_condition_guide.md).
+====================================================
+[3b/3] Running the two-session concurrency demos (race, FOR UPDATE, SERIALIZABLE, deadlock) ...
+Portfolio 3 - concurrency demos (two real sessions)
+
+=== PART 1 - the bug: check-then-insert at READ COMMITTED (slot capacity 5, 4 used) ===
+  [A] counts 4 used of 5 -> looks free
+  [B] counts 4 used of 5 -> looks free
+  [A] INSERT booking (not committed yet)
+  [B] INSERT booking (A's row is invisible to B)
+  [A] COMMIT
+  [B] COMMIT
+  RESULT: 6 bookings in a slot of capacity 5  ->  OVERBOOKED (bug reproduced)
+
+=== PART 2 - fix 1: SELECT ... FOR UPDATE on the slot row (what book_pickup() does) ===
+  [A] locked the slot row
+  [B] is waiting for A's lock (thread alive = True)
+  [A] counts 4 used -> free
+  [A] COMMIT (lock released)
+  [B] got the lock, counted 5 used -> REJECTED: slot full
+  RESULT: 5 bookings, capacity 5  ->  correct, no overbooking
+
+=== PART 3 - fix 2: SERIALIZABLE isolation (one session is told to retry) ===
+  [A] counts 4 used
+  [B] counts 4 used
+  [A] COMMIT ok
+  [B] COMMIT refused, SQLSTATE 40001: could not serialize access due to read/write dependencies among transactions
+  RESULT: 5 bookings, capacity 5  ->  correct (the loser must retry)
+
+=== PART 4 - deadlock: A locks slot 1 then 2, B locks slot 2 then 1 ===
+  [A] locked slot 631
+  [B] locked slot 632
+  [A] 40P01 deadlock detected
+  [B] ok
+  RESULT: PostgreSQL killed ['A'] with SQLSTATE 40P01; the other session completed.
+  Fix: always lock slots in ascending slot_id order (then no cycle is possible).
+
+Done.
+============================================================
+ Portfolio 3 complete. Real output saved in race_demos_output.log
+============================================================
